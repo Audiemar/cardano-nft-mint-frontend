@@ -1,0 +1,16 @@
+/** Utility classes with some minimal styling **/
+.container {
+  text-align: center;
+}
+
+.bordered {
+  border: 1px solid;
+}
+
+.padded {
+  padding: 5px;
+}
+
+.hidden {
+  display: none;
+}
