@@ -15,6 +15,8 @@ const KEY_SUFFIX = 'name';
 const METADATA_KEY = '721';
 const SPAN_TYPE = 'SPAN';
 const VALUE_SUFFIX = 'value';
+const LOVELACE = 'lovelace';
+
 
 function shortToast(message) {
   Toastify({text: message, duration: 3000}).showToast();
@@ -213,6 +215,8 @@ export function performMintTxn(e, blockfrostDom, nameDom, datetimeDom, slotDom, 
   updateDatetimePromise.then(policyExpirationSlot => {
     Selector.enableWallet(Selector.getConnectedWallet()).then(wallet => {
       LucidInst.getLucidInstance(blockfrostKey).then(lucid => {
+        
+        console.log(`blockfrostKey: ${blockfrostKey}`);
         if (lucid === undefined) {
           longToast('Your blockfrost key does not match the network of your wallet.');
           return;
@@ -261,7 +265,8 @@ export function performMintTxn(e, blockfrostDom, nameDom, datetimeDom, slotDom, 
         }
         var chainMetadata = wrapMetadataFor(mintingPolicy.policyID, nftMetadata);
         var assetName = `${mintingPolicy.policyID}${toHex(nftName)}`
-        var mintAssets = { [assetName]: 1 }
+        var mintAssets = {[assetName]: 1 }
+        var mintVend = {[LOVELACE]: 2000000, [assetName]: 1 }
 
         var domToClear = getDomElementsToClear(traitsPrefix, numTraits, nameDom, fileDom, ipfsDisplayDom);
 
@@ -292,19 +297,23 @@ export function performMintTxn(e, blockfrostDom, nameDom, datetimeDom, slotDom, 
               longToast(`Unknown network detected ${lucid.network}`);
               return;
             }
-			var address = document.querySelector ("#receive");
-       var txBuilder = lucid.newTx()
+
+			      var address = document.querySelector ("#receive").value;
+            var txBuilder = lucid.newTx()
                                  .attachMintingPolicy(mintingPolicy)
                                  .attachMetadata(METADATA_KEY, chainMetadata)
                                  .mintAssets(mintAssets)
-                                 .payToAddress(address, mintAssets)
+                                 .payToAddress(address, mintVend)
+
             if (policyExpirationSlot) {
               txBuilder = txBuilder.validTo(lucid.utils.slotToUnixTime(policyExpirationSlot));
             }
+
             txBuilder.complete().then(tx => signAndSubmitTxn(tx, scriptSKey, domToClear)).catch(toastMintError);
+
           }).catch(e => toastMintError(`Unknown error retrieving your wallet address: ${e}`));
-        }).catch(e => toastMintError(`Unknown error validating wallet: ${e}`));
-      }).catch(e => toastMintError('Could not initialize Lucid (check your blockfrost key)'));
+        }).catch(e => {toastMintError(`Unknown error validating wallet: ${e}`); console.log(e)});
+      }).catch(e => {toastMintError('Could not initialize Lucid (check your blockfrost key)'); console.log(e)});
     }).catch(e => toastMintError(`Could not initialize the wallet that you selected: ${e}`));
   }).catch(e => toastMintError(`Could not interpret slot: ${e}`));
 }
