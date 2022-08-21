@@ -161,6 +161,7 @@ export function handlePolicyAcknowledgement(e, policyAckDom, formDom){
 
 export function uploadToIpfs(e, nftStorageDom, fileDom, ipfsDisplayDom) {
   e && e.preventDefault();
+
   var ipfsDisplay = document.querySelector(ipfsDisplayDom);
   var existingIpfsDisplay = ipfsDisplay.innerHTML;
   ipfsDisplay.innerHTML = 'Upload in progress... please wait for browser alert';
@@ -173,6 +174,7 @@ export function uploadToIpfs(e, nftStorageDom, fileDom, ipfsDisplayDom) {
   }
 
   var fileInput = document.querySelector(fileDom);
+
   if (fileInput.files.length != 1) {
     Toastify({
       text: `Upload exactly 1 file, you uploaded ${fileInput.files.length}`,
@@ -183,7 +185,10 @@ export function uploadToIpfs(e, nftStorageDom, fileDom, ipfsDisplayDom) {
   }
 
   var file = fileInput.files[0];
+
   NftStorage.uploadFromFileInput(nftStorageToken, file).then(cid => {
+    localStorage.setItem("ipfsLink", cid);
+
     var ipfsIoAnchor = `<a id=${IPFS_LINK_ID} target="_blank" rel="noopener noreferrer" href="https://ipfs.io/ipfs/${cid}">${cid}</a>`;
     var fileNameSpan = `<span id=${FILENAME_ID}>${file.name}</span>`;
     var mediaTypeSpan = `<span id=${FILETYPE_ID}>${file.type}</span>`;
@@ -370,9 +375,13 @@ function generateCip0025MetadataFor(nftName, ipfsDisplayDom, traitsPrefix, numTr
   var cip0025Metadata = {name: nftName};
 
   var ipfsDisplayEls = document.querySelector(ipfsDisplayDom);
-  var ipfsCidLink = ipfsDisplayEls.querySelector(`#${IPFS_LINK_ID}`);
+  // var ipfsCidLink = ipfsDisplayEls.querySelector(`#${IPFS_LINK_ID}`);
+  var ipfsCidLink = localStorage.getItem('ipfsLink');
+
   if (ipfsCidLink) {
-    cip0025Metadata['image'] = ipfsCidLink.textContent;
+    // cip0025Metadata['image'] = ipfsCidLink.textContent;
+    cip0025Metadata['image'] = ipfsCidLink;
+
   }
   var ipfsMimeType = ipfsDisplayEls.querySelector(`#${FILETYPE_ID}`);
   if (ipfsMimeType) {
