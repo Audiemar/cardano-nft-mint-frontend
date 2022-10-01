@@ -20,7 +20,7 @@
     "nft.storage": "^6.3.0",
     "static-server": "^2.2.1",
     "typescript": "^4.7.2",
-    "webpack-dev-server": "^3.11.0"
+    "webpack-dev-server": "^4.11.1"
 
   },
   "devDependencies": {
